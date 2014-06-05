@@ -59,7 +59,7 @@ set(CONV_SOURCES
   fileio.c
   fold.c
   getchar.c
-  if_cscope.c
+  hardcopy.c
   indent.c
   keymap.c
   mark.c

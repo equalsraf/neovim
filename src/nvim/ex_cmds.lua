@@ -491,16 +491,6 @@ return {
     func='ex_cc',
   },
   {
-    command='cscope',
-    flags=bit.bor(EXTRA, NOTRLCOM, XFILE),
-    func='do_cscope',
-  },
-  {
-    command='cstag',
-    flags=bit.bor(BANG, TRLBAR, WORD1),
-    func='do_cstag',
-  },
-  {
     command='cunmap',
     flags=bit.bor(EXTRA, TRLBAR, NOTRLCOM, USECTRLV, CMDWIN),
     func='ex_unmap',
@@ -1069,11 +1059,6 @@ return {
     command='lclose',
     flags=bit.bor(RANGE, NOTADR, COUNT, TRLBAR),
     func='ex_cclose',
-  },
-  {
-    command='lcscope',
-    flags=bit.bor(EXTRA, NOTRLCOM, XFILE),
-    func='do_cscope',
   },
   {
     command='left',
@@ -1884,11 +1869,6 @@ return {
     command='scriptencoding',
     flags=bit.bor(WORD1, TRLBAR, CMDWIN),
     func='ex_scriptencoding',
-  },
-  {
-    command='scscope',
-    flags=bit.bor(EXTRA, NOTRLCOM),
-    func='do_scscope',
   },
   {
     command='set',
