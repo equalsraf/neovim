@@ -6,6 +6,7 @@
 #include "nvim/os/os.h"
 #include "nvim/misc2.h"
 #include "nvim/strings.h"
+#include "nvim/memory.h"
 
 #ifdef HAVE__NSGETENVIRON
 #include <crt_externs.h>
@@ -22,7 +23,22 @@ const char *os_getenv(const char *name)
 
 int os_setenv(const char *name, const char *value, int overwrite)
 {
+#ifdef HAVE_SETENV
   return setenv(name, value, overwrite);
+#else
+  // Use putenv, instead of setenv - this will leak memory
+  // but in some systems only putenv is available
+  if (!overwrite && os_getenv(name) != NULL) {
+    return 0;
+  }
+
+  size_t len = strlen(name) + 1 + strlen(value) + 1;
+  char *env = xmalloc(len);
+  xstrlcpy(env, name, len);
+  STRCAT(env, "=");
+  STRCAT(env, value);
+  return putenv(env);
+#endif
 }
 
 char *os_getenvname_at_index(size_t index)
