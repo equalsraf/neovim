@@ -34,7 +34,7 @@ typedef enum {
 
 static RStream *read_stream;
 static RBuffer *read_buffer, *input_buffer;
-static bool eof = false, started_reading = false;
+static bool input_eof = false, started_reading = false;
 
 #ifdef INCLUDE_GENERATED_DECLARATIONS
 # include "os/input.c.generated.h"
@@ -315,7 +315,7 @@ static InbufPollResult inbuf_poll(int ms)
   }
 
   if (input_poll(ms)) {
-    return eof && rstream_pending(read_stream) == 0 ?
+    return input_eof && rstream_pending(read_stream) == 0 ?
       kInputEof :
       kInputAvail;
   }
@@ -351,7 +351,7 @@ static void read_cb(RStream *rstream, void *data, bool at_eof)
       // redirects stdin from /dev/null. Previously, this was done in ui.c
       stderr_switch();
     } else {
-      eof = true;
+      input_eof = true;
     }
   }
 
@@ -442,7 +442,7 @@ static bool input_ready(void)
   return typebuf_was_filled ||                 // API call filled typeahead
          rbuffer_pending(input_buffer) > 0 ||  // Stdin input
          event_has_deferred() ||               // Events must be processed
-         (!abstract_ui && eof);                // Stdin closed
+         (!abstract_ui && input_eof);                // Stdin closed
 }
 
 // Exit because of an input read error.
