@@ -11,6 +11,7 @@
 # include "os/fs.h.generated.h"
 # include "os/mem.h.generated.h"
 # include "os/env.h.generated.h"
+# include "nvim/os/os_defs.h"
 # include "os/users.h.generated.h"
 #endif
 
