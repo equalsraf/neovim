@@ -30,8 +30,6 @@
 # define MAXNAMLEN 512
 #endif
 
-#define BASENAMELEN (MAXNAMLEN - 5)
-
 // Use the system path length if it makes sense.
 #if defined(PATH_MAX) && (PATH_MAX > 1000)
 # define MAXPATHL PATH_MAX

@@ -9,6 +9,8 @@
 # include <sys/param.h>
 #endif
 
+#define BASENAMELEN (MAXNAMLEN - 5)
+
 #define TEMP_DIR_NAMES {"$TMPDIR", "/tmp", ".", "~"}
 #define TEMP_FILE_PATH_MAXLEN 256
 
