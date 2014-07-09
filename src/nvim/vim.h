@@ -43,7 +43,7 @@ Error: configure did not run properly.Check auto/config.log.
 # define VIMPACKAGE     "vim"
 #endif
 
-#include "nvim/os_unix_defs.h"       /* bring lots of system header files */
+#include "nvim/os/os_defs.h"       /* bring lots of system header files */
 
 #ifndef min
 # define min(X, Y) (X < Y ? X : Y)
