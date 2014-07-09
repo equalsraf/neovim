@@ -41,6 +41,14 @@ if (LibIntl_LIBRARY)
   set(CMAKE_REQUIRED_LIBRARIES "${LibIntl_LIBRARY}")
 endif()
 
+# For Mingw link against iconv too
+if (MINGW)
+  find_library(LibIconv_LIBRARY
+      NAMES iconv libiconv.a
+  )
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${LibIconv_LIBRARY}")
+endif()
+
 check_c_source_compiles("
 #include <libintl.h>
 
@@ -56,5 +64,5 @@ if (HAVE_WORKING_LIBINTL)
 endif()
 
 set(LibIntl_PROCESS_INCLUDES LibIntl_INCLUDE_DIR)
-set(LibIntl_PROCESS_LIBS LibIntl_LIBRARY)
+set(LibIntl_PROCESS_LIBS LibIntl_LIBRARY LibIconv_LIBRARY)
 libfind_process(LibIntl)
