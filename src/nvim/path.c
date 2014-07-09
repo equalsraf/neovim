@@ -606,6 +606,21 @@ unix_expandpath (
         sizeof(char_u *), pstrcmp);
   return matches;
 }
+#else
+
+int 
+unix_expandpath (
+    garray_T *gap,
+    char_u *path,
+    int wildoff,
+    int flags,                      /* EW_* flags */
+    int didstar                    /* expanded "**" once already */
+)
+{
+  return 0;
+}
+
+
 #endif
 
 /*

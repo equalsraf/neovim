@@ -2246,6 +2246,7 @@ void settmode(int tmode)
     return;
   }
 
+#ifdef UNIX
   if (full_screen) {
     /*
      * When returning after calling a shell we want to really set the
@@ -2276,6 +2277,7 @@ void settmode(int tmode)
     }
     may_req_termresponse();
   }
+#endif
 }
 
 void starttermcap(void)

@@ -190,7 +190,9 @@ void mch_settitle(char_u *title, char_u *icon)
     if (abstract_ui) {
       ui_set_title((char *)title);
     } else if (*T_TS != NUL)                   /* it's OK if t_fs is empty */
+#ifdef UNIX
       term_settitle(title);
+#endif
     did_set_title = TRUE;
   }
 
@@ -251,8 +253,12 @@ int vim_is_xterm(char_u *name)
  */
 int use_xterm_like_mouse(char_u *name)
 {
+#ifdef UNIX
   return name != NULL
          && (term_is_xterm || STRNICMP(name, "screen", 6) == 0);
+#else
+  return FALSE;
+#endif
 }
 
 /*
@@ -264,6 +270,7 @@ int use_xterm_like_mouse(char_u *name)
  */
 int use_xterm_mouse(void)
 {
+#ifdef UNIX
   if (ttym_flags == TTYM_SGR)
     return 4;
   if (ttym_flags == TTYM_URXVT)
@@ -272,6 +279,7 @@ int use_xterm_mouse(void)
     return 2;
   if (ttym_flags == TTYM_XTERM)
     return 1;
+#endif
   return 0;
 }
 
@@ -436,8 +444,10 @@ int mch_nodetype(char_u *name)
     return NODE_NORMAL;
   if (S_ISREG(st.st_mode) || S_ISDIR(st.st_mode))
     return NODE_NORMAL;
+#ifdef UNIX
   if (S_ISBLK(st.st_mode))      /* block device isn't writable */
     return NODE_OTHER;
+#endif
   /* Everything else is writable? */
   return NODE_WRITABLE;
 }
@@ -523,6 +533,7 @@ void mch_exit(int r)
   exit(r);
 }
 
+#ifdef UNIX
 void mch_settmode(int tmode)
 {
   static int first = TRUE;
@@ -608,6 +619,7 @@ void mch_settmode(int tmode)
 #endif
   curr_tmode = tmode;
 }
+#endif
 
 /*
  * Try to get the code for "t_kb" from the stty setting
@@ -620,6 +632,7 @@ void mch_settmode(int tmode)
  */
 void get_stty(void)
 {
+#ifdef UNIX
   char_u buf[2];
   char_u  *p;
 
@@ -658,6 +671,7 @@ void get_stty(void)
     if (p != NULL && p[0] == buf[0] && p[1] == buf[1])
       do_fixdel(NULL);
   }
+#endif
 }
 
 /*
@@ -665,6 +679,7 @@ void get_stty(void)
  */
 void mch_setmouse(int on)
 {
+#ifdef UNIX
   static int ison = FALSE;
   int xterm_mouse_vers;
 
@@ -709,11 +724,13 @@ void mch_setmouse(int on)
     ison = on;
   }
 
+#endif
 }
 
 /// Sets the mouse termcode, depending on the 'term' and 'ttymouse' options.
 void check_mouse_termcode(void)
 {
+#ifdef UNIX
   xterm_conflict_mouse = false;
 
   if (use_xterm_mouse()
@@ -777,6 +794,7 @@ void check_mouse_termcode(void)
   } else {
     del_mouse_termcode(KS_SGR_MOUSE);
   }
+#endif
 }
 
 /*
@@ -872,7 +890,9 @@ void mch_set_shellsize(void)
      * undefined, check the output of configure.  It could probably not
      * find a ncurses, termcap or termlib library.
      */
+#ifdef UNIX
     term_set_winsize((int)Rows, (int)Columns);
+#endif
     out_flush();
     screen_start();                     /* don't know where cursor is now */
   }
@@ -1388,3 +1408,11 @@ static int have_dollars(int num, char_u **file)
       return TRUE;
   return FALSE;
 }
+
+#ifdef WIN32
+uid_t getuid(void)
+{
+  return -1;
+}
+#endif
+
