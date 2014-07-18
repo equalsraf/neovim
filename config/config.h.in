@@ -74,6 +74,7 @@
 #define TGETENT_ZERO_ERR 0
 #define TIME_WITH_SYS_TIME 1
 #cmakedefine UNIX
+#cmakedefine MSVC
 #define USEMAN_S 1
 
 #define FEAT_BROWSE
