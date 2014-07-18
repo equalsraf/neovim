@@ -196,8 +196,11 @@ list(APPEND NVIM_LINK_LIBRARIES
     ${LIBUV_LIBRARIES}
     ${MSGPACK_LIBRARIES}
     ${LUAJIT_LIBRARIES}
-    m
     ${CMAKE_THREAD_LIBS_INIT})
+
+if(UNIX)
+  list(APPEND NVIM_LINK_LIBRARIES m)
+endif()
 
 if(WIN32)
   # libuv needs these
