@@ -45,11 +45,15 @@
 #   define S_IXUSR S_IEXEC
 # endif
 
+// FIXME: this is a hack - also used in ex_cmds2.c
+// to build in windows without libintl
+# define LC_MESSAGES LC_COLLATE
+
 // FIXME: (equalsraf)
-#define close _close
-#define read _read
-#define write _write
-#define snprintf _snprintf
+# define close _close
+# define read _read
+# define write _write
+# define snprintf _snprintf
 #endif
 
 #define TEMP_DIR_NAMES {"$TMP", "$TEMP", "$USERPROFILE", ""}
