@@ -2769,7 +2769,9 @@ static void switch_to_8bit(void)
     need_gather = true;                 // need to fill termleader[]
   }
   detected_8bit = true;
-  LOG_TR("Switching to 8 bit");
+# ifdef DEBUG_TERMRESPONSE
+  log_tr("Switching to 8 bit");
+# endif
 }
 
 static linenr_T orig_topline = 0;
