@@ -1735,17 +1735,20 @@ static char *tgoto(char *cm, int x, int y)
   if (!cm)
     return "OOPS";
   char *e = buf + 29;
-  for (char *s = buf; s < e && *cm; cm++) {
+  char *s = buf;
+  for (; s < e && *cm; cm++) {
     if (*cm != '%') {
       *s++ = *cm;
       continue;
     }
     switch (*++cm) {
     case 'd':
+      {
       char *p = (char *)tltoa((unsigned long)y);
       y = x;
       while (*p)
         *s++ = *p++;
+      }
       break;
     case 'i':
       x++;
