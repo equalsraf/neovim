@@ -8,8 +8,6 @@
 #ifndef NVIM_VIM_H
 # define NVIM_VIM_H
 
-#define min(X, Y) (X < Y ? X : Y)
-
 #include "nvim/types.h"
 #include "nvim/pos.h"  // for linenr_T, MAXCOL, etc...
 
@@ -46,6 +44,10 @@ Error: configure did not run properly.Check auto/config.log.
 #endif
 
 #include "nvim/os_unix_defs.h"       /* bring lots of system header files */
+
+#ifndef min
+# define min(X, Y) (X < Y ? X : Y)
+#endif
 
 #define NUMBUFLEN 30        /* length of a buffer to store a number in ASCII */
 
