@@ -55,9 +55,9 @@ set(LIBUV_URL https://github.com/libuv/libuv/archive/v1.3.0.tar.gz)
 set(LIBUV_SHA1 ff0346b8d642fe99a04e22a26cf8f94b5a01e6bb)
 set(LIBUV_MD5 182b6cdd102fed039b0c44c181fc2fb2)
 
-set(MSGPACK_URL https://github.com/msgpack/msgpack-c/archive/ecf4b09acd29746829b6a02939db91dfdec635b4.tar.gz)
-set(MSGPACK_SHA1 c160ff99f20d9d0a25bea0a57f4452f1c9bde370)
-set(MSGPACK_MD5 3599eaf904b8ba0c36cea7ed80973364)
+set(MSGPACK_URL https://github.com/msgpack/msgpack-c/archive/c52a58b322212e4125f9c49457efafb3441da317.tar.gz)
+set(MSGPACK_SHA1 c2796bcceffa0747d2244b81fed1c3a1c8dd42cf)
+set(MSGPACK_MD5 4e85cac468fb38a3ddb8797eedefa5b8)
 
 set(LUAJIT_URL http://luajit.org/download/LuaJIT-2.0.3.tar.gz)
 set(LUAJIT_SHA1 2db39e7d1264918c2266b0436c313fbd12da4ceb)
@@ -192,6 +192,22 @@ if(USE_BUNDLED_LIBUV)
     # Build libuv for the target
     set(LIBUV_CONFIGURE_COMMAND ${LIBUV_CFGCMD_UNIX} --host=${CROSS_TARGET})
     BuildLibUv(libuv)
+  elseif(WIN32 AND MSVC)
+
+    find_package(PythonInterp 2.6 REQUIRED)
+    if (NOT PYTHONINTERP_FOUND OR PYTHON_VERSION_MAJOR GREATER 2)
+      message(FATAL_ERROR "Python2 is required to build libuv on windows, use -DPYTHON_EXECUTABLE to set a python interpreter")
+    endif()
+
+    # FIXME: by default this creates Debug builds
+    set(LIBUV_CONFIGURE_COMMAND "")
+    set(LIBUV_BUILD_COMMAND set PYTHON=${PYTHON_EXECUTABLE} COMMAND ${DEPS_BUILD_DIR}/src/libuv/vcbuild.bat static debug)
+    set(LIBUV_INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/lib
+	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/libuv/Debug/lib/libuv.lib ${DEPS_INSTALL_DIR}/lib
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/include
+	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DEPS_BUILD_DIR}/src/libuv/include ${DEPS_INSTALL_DIR}/include)
+ 
+    BuildLibUv(libuv)
   endif()
 
   list(APPEND THIRD_PARTY_DEPS libuv)
@@ -238,6 +254,18 @@ if(USE_BUNDLED_MSGPACK)
       -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
       # Hack to avoid -rdynamic in Mingw
       -DCMAKE_SHARED_LIBRARY_LINK_C_FLAGS="")
+  elseif(WIN32 AND MSVC)
+    # Same as UNIX without fPIC
+    set(MSGPACK_CONFIGURE_COMMAND cmake ${DEPS_BUILD_DIR}/src/msgpack
+           -DMSGPACK_ENABLE_CXX=OFF
+           -DMSGPACK_BUILD_TESTS=OFF
+           -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR}
+           -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+	   -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+           # Use static runtime
+           -DCMAKE_C_FLAGS_DEBUG="-MTd"
+           -DCMAKE_C_FLAGS_RELEASE="-MT"
+           "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_COMPILER_ARG1}")
   endif()
   BuildMsgpack(msgpack)
 
@@ -289,6 +317,18 @@ if(USE_BUNDLED_LUAJIT)
               HOST_LDFLAGS=${HOST_EXE_LINKER_FLAGS}
               FILE_T=luajit.exe
               INSTALL_TSYMNAME=luajit.exe)
+    BuildLuaJit(luajit)
+  elseif(WIN32 AND MSVC)
+    set(LUAJIT_CONFIGURE_COMMAND "")
+    set(LUAJIT_BUILD_COMMAND cd src && msvcbuild static)
+    set(LUAJIT_INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/bin
+	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/luajit/src/luajit.exe ${DEPS_INSTALL_DIR}/bin
+	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/luajit/src/lua51.lib ${DEPS_INSTALL_DIR}/bin
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/lib
+	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/luajit/src/lua51.lib ${DEPS_INSTALL_DIR}/lib
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/include/luajit-2.0
+	    # FIXME: Copy only the necessary headers, but cmake does not accept wildcards
+	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DEPS_BUILD_DIR}/src/luajit/src/ ${DEPS_INSTALL_DIR}/include/luajit-2.0)
     BuildLuaJit(luajit)
   endif()
 
