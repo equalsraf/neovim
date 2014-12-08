@@ -79,7 +79,7 @@ set(LIBTICKIT_URL https://github.com/neovim/libtickit/archive/33f4afb3891df05955
 set(LIBTICKIT_SHA1 3aab459b9fb3cd83e85ac2e08f05e5f162c8c9d2)
 set(LIBTICKIT_MD5 19ee9271c16716620d0906db74158ec6)
 
-if(USE_BUNDLED_LIBUNIBILIUM)
+if(USE_BUNDLED_LIBUNIBILIUM AND NOT WIN32)
   ExternalProject_Add(libunibilium
     PREFIX ${DEPS_BUILD_DIR}
     URL ${LIBUNIBILIUM_URL}
@@ -101,7 +101,7 @@ if(USE_BUNDLED_LIBUNIBILIUM)
   list(APPEND THIRD_PARTY_DEPS libunibilium)
 endif()
 
-if(USE_BUNDLED_LIBTERMKEY)
+if(USE_BUNDLED_LIBTERMKEY AND NOT WIN32)
   ExternalProject_Add(libtermkey
     PREFIX ${DEPS_BUILD_DIR}
     URL ${LIBTERMKEY_URL}
@@ -126,7 +126,7 @@ if(USE_BUNDLED_LIBTERMKEY)
   add_dependencies(libtermkey libunibilium)
 endif()
 
-if(USE_BUNDLED_LIBTICKIT)
+if(USE_BUNDLED_LIBTICKIT AND NOT WIN32)
   ExternalProject_Add(libtickit
     PREFIX ${DEPS_BUILD_DIR}
     URL ${LIBTICKIT_URL}
