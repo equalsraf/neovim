@@ -57,6 +57,7 @@
 #include "nvim/os/os.h"
 #include "nvim/os/time.h"
 #include "nvim/os/input.h"
+#include "nvim/log.h"
 
 #ifdef HAVE_TGETENT
 # ifdef HAVE_TERMIOS_H
@@ -119,8 +120,6 @@ static char_u *tgetent_error(char_u *, char_u *);
  */
 char            *tgetstr(char *, char **);
 
-/* Change this to "if 1" to debug what happens with termresponse. */
-#   define LOG_TR(msg)
 /* Request Terminal Version status: */
 #  define CRV_GET       1       /* send T_CRV when switched to RAW mode */
 #  define CRV_SENT      2       /* did send T_CRV, waiting for answer */
@@ -1424,7 +1423,7 @@ int set_termname(char_u *term)
 
   full_screen = TRUE;           /* we can use termcap codes from now on */
   set_term_defaults();          /* use current values as defaults */
-  LOG_TR("setting crv_status to CRV_GET");
+  DLOG("setting crv_status to CRV_GET");
   crv_status = CRV_GET;         /* Get terminal version later */
 
   /*
@@ -2392,7 +2391,7 @@ void may_req_termresponse(void)
       && !xterm_conflict_mouse
 # endif
       && *T_CRV != NUL) {
-    LOG_TR("Sending CRV");
+    DLOG("Sending CRV");
     out_str(T_CRV);
     crv_status = CRV_SENT;
     /* check for the characters now, otherwise they might be eaten by
@@ -2425,7 +2424,7 @@ void may_req_ambiguous_char_width(void)
       && !option_was_set((char_u *)"ambiwidth")) {
     char_u buf[16];
 
-    LOG_TR("Sending U7 request");
+    DLOG("Sending U7 request");
     /* Do this in the second row.  In the first row the returned sequence
      * may be CSI 1;2R, which is the same as <S-F3>. */
     term_windgoto(1, 0);
@@ -3033,7 +3032,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
             row_char = tp[i - 1];
           }
         if (i == len) {
-          LOG_TR("Not enough characters for CRV");
+          DLOG("Not enough characters for CRV");
           return -1;
         }
         if (extra > 0) {
@@ -3049,7 +3048,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
         if (j == 1 && tp[i] == 'R' && row_char == '2' && col >= 2) {
           char *aw = NULL;
 
-          LOG_TR("Received U7 status");
+          DLOG("Received U7 status");
           u7_status = U7_GOT;
           did_cursorhold = TRUE;
           if (col == 2) {
@@ -3081,7 +3080,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
         } else
         /* eat it when at least one digit and ending in 'c' */
         if (*T_CRV != NUL && i > 2 + (tp[0] != CSI) && tp[i] == 'c') {
-          LOG_TR("Received CRV");
+          DLOG("Received CRV");
           crv_status = CRV_GOT;
           did_cursorhold = TRUE;
 
@@ -3116,7 +3115,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
 
             /* if xterm version >= 141 try to get termcap codes */
             if (extra >= 141) {
-              LOG_TR("Enable checking for XT codes");
+              DLOG("Enable checking for XT codes");
               check_for_codes = TRUE;
               need_gather = true;
               req_codes_from_term();
@@ -3148,7 +3147,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
           }
 
         if (i == len) {
-          LOG_TR("not enough characters for XT");
+          DLOG("not enough characters for XT");
           return -1;                    /* not enough characters */
         }
       }
@@ -3633,7 +3632,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
     return retval == 0 ? (len + extra + offset) : retval;
   }
 
-  LOG_TR("normal character");
+  DLOG("normal character");
 
   return 0;                         /* no match found */
 }
