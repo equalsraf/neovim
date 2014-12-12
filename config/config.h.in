@@ -91,4 +91,6 @@
 #define FEAT_MOUSE_TTY
 #define FEAT_MOUSE_URXVT
 #define FEAT_MOUSE_XTERM
-#define FEAT_TERMRESPONSE
+#ifdef HAVE_TGETENT
+# define FEAT_TERMRESPONSE
+#endif

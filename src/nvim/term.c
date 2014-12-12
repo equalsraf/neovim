@@ -1423,8 +1423,10 @@ int set_termname(char_u *term)
 
   full_screen = TRUE;           /* we can use termcap codes from now on */
   set_term_defaults();          /* use current values as defaults */
+#ifdef FEAT_TERMRESPONSE
   DLOG("setting crv_status to CRV_GET");
   crv_status = CRV_GET;         /* Get terminal version later */
+#endif
 
   /*
    * Initialize the terminal with the appropriate termcap codes.
@@ -1467,7 +1469,9 @@ int set_termname(char_u *term)
     }
   }
 
+#ifdef FEAT_TERMRESPONSE
   may_req_termresponse();
+#endif
 
   return OK;
 }
@@ -2256,6 +2260,7 @@ void settmode(int tmode)
      * machines.
      */
     if (tmode != TMODE_COOK || cur_tmode != TMODE_COOK) {
+#ifdef FEAT_TERMRESPONSE
       {
         /* May need to check for T_CRV response and termcodes, it
          * doesn't work in Cooked mode, an external program may get
@@ -2265,6 +2270,7 @@ void settmode(int tmode)
           (void)vpeekc_nomap();
         check_for_codes_from_term();
       }
+#endif
       if (tmode != TMODE_RAW)
         mch_setmouse(FALSE);                    /* switch mouse off */
       out_flush();
@@ -2274,7 +2280,9 @@ void settmode(int tmode)
         setmouse();                             /* may switch mouse on */
       out_flush();
     }
+#ifdef FEAT_TERMRESPONSE
     may_req_termresponse();
+#endif
   }
 #endif
 }
@@ -2287,6 +2295,7 @@ void starttermcap(void)
     out_flush();
     termcap_active = TRUE;
     screen_start();                     /* don't know where cursor is now */
+#ifdef FEAT_TERMRESPONSE
     if (!abstract_ui) {
       may_req_termresponse();
       /* Immediately check for a response.  If t_Co changes, we don't
@@ -2295,6 +2304,7 @@ void starttermcap(void)
         check_for_codes_from_term();
       }
     }
+#endif
   }
 }
 
@@ -2303,6 +2313,7 @@ void stoptermcap(void)
   screen_stop_highlight();
   reset_cterm_colors();
   if (termcap_active) {
+#ifdef FEAT_TERMRESPONSE
     if (!abstract_ui) {
       /* May need to discard T_CRV or T_U7 response. */
       if (crv_status == CRV_SENT || u7_status == U7_SENT) {
@@ -2320,6 +2331,7 @@ void stoptermcap(void)
        * get them. */
       check_for_codes_from_term();
     }
+#endif
     out_str(T_KE);                      /* stop "keypad transmit" mode */
     out_flush();
     termcap_active = FALSE;
@@ -2362,6 +2374,7 @@ void resume_get_esc_sequence(void)
 }
 #endif
 
+#ifdef FEAT_TERMRESPONSE
 /*
  * Request version string (for xterm) when needed.
  * Only do this after switching to raw mode, otherwise the result will be
@@ -2462,6 +2475,7 @@ static void log_tr(char *msg)                 {
 }
 
 # endif
+#endif // FEAT_TERMRESPONSE
 
 /*
  * Return TRUE when saving and restoring the screen.
@@ -2997,6 +3011,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
       }
     }
 
+#ifdef FEAT_TERMRESPONSE
     if (key_name[0] == NUL
         /* URXVT mouse uses <ESC>[#;#;#M, but we are matching <ESC>[ */
         || key_name[0] == KS_URXVT_MOUSE
@@ -3152,6 +3167,7 @@ int check_termcode(int max_offset, char_u *buf, int bufsize, int *buflen)
         }
       }
     }
+#endif
 
     if (key_name[0] == NUL)
       continue;             /* No match at this position, try next one */
@@ -3985,6 +4001,7 @@ int show_one_termcode(char_u *name, char_u *code, int printit)
   return len;
 }
 
+#ifdef FEAT_TERMRESPONSE
 /*
  * For Xterm >= 140 compiled with OPT_TCAP_QUERY: Obtain the actually used
  * termcap codes from the terminal itself.
@@ -4149,6 +4166,7 @@ static void check_for_codes_from_term(void)
   --no_mapping;
   --allow_keys;
 }
+#endif // FEAT_TERMRESPONSE
 
 /*
  * Translate an internal mapping/abbreviation representation into the

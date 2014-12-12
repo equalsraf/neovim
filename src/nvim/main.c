@@ -399,7 +399,9 @@ int main(int argc, char **argv)
 
   starttermcap(); // start termcap if not done by wait_return()
   TIME_MSG("start termcap");
+#ifdef FEAT_TERMRESPONSE
   may_req_ambiguous_char_width();
+#endif
   setmouse();  // may start using the mouse
 
   if (scroll_region) {
@@ -479,9 +481,11 @@ int main(int argc, char **argv)
   no_wait_return = FALSE;
   starting = 0;
 
+#ifdef FEAT_TERMRESPONSE
   /* Requesting the termresponse is postponed until here, so that a "-c q"
    * argument doesn't make it appear in the shell Vim was started from. */
   may_req_termresponse();
+#endif
 
   /* start in insert mode */
   if (p_im)
