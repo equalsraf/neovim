@@ -15,6 +15,12 @@
 #include <stddef.h>        // for size_t
 #include <stdio.h>         // for snprintf().
 #include <stdlib.h>        // for rand_r().
+#include "auto/config.h"
+
+#ifdef MSVC
+// There is no rand_r in MSVC
+# define rand_r rand
+#endif
 
 #include "nvim/os/time.h"  // for os_hrtime().
 #include "nvim/sha256.h"   // for context_sha256_T
