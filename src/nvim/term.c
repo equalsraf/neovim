@@ -2414,6 +2414,7 @@ void may_req_termresponse(void)
   }
 }
 
+#ifdef FEAT_TERMRESPONSE
 /*
  * Check how the terminal treats ambiguous character width (UAX #11).
  * First, we move the cursor to (1, 0) and print a test ambiguous character
@@ -2455,6 +2456,7 @@ void may_req_ambiguous_char_width(void)
     (void)vpeekc_nomap();
   }
 }
+#endif
 
 # ifdef DEBUG_TERMRESPONSE
 static void log_tr(char *msg)                 {
