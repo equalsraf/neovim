@@ -336,17 +336,25 @@ if(USE_BUNDLED_LUAJIT)
 endif()
 
 if(USE_BUNDLED_LUAROCKS)
-  if(USE_BUNDLED_LUAJIT)
-    if (CMAKE_CROSSCOMPILING)
-      list(APPEND LUAROCKS_OPTS
-        --with-lua=${DEPS_HOST_DIR}
-        --with-lua-include=${DEPS_HOST_DIR}/include/luajit-2.0)
-    else()
-      list(APPEND LUAROCKS_OPTS
-        --with-lua=${DEPS_INSTALL_DIR}
-        --with-lua-include=${DEPS_INSTALL_DIR}/include/luajit-2.0)
-    endif()
-  endif()
+  function(BuildLuaRocks)
+    ExternalProject_Add(luarocks
+      PREFIX ${DEPS_BUILD_DIR}
+      URL ${LUAROCKS_URL}
+      DOWNLOAD_DIR ${DEPS_DOWNLOAD_DIR}/luarocks
+      DOWNLOAD_COMMAND ${CMAKE_COMMAND}
+        -DPREFIX=${DEPS_BUILD_DIR}
+        -DDOWNLOAD_DIR=${DEPS_DOWNLOAD_DIR}/luarocks
+        -DURL=${LUAROCKS_URL}
+        -DEXPECTED_SHA1=${LUAROCKS_SHA1}
+        -DEXPECTED_MD5=${LUAROCKS_MD5}
+        -DTARGET=luarocks
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadAndExtractFile.cmake
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND "${LUAROCKS_CONFIGURE_COMMAND}"
+      BUILD_COMMAND "${LUAROCKS_BUILD_COMMAND}"
+      INSTALL_COMMAND "${LUAROCKS_INSTALL_COMMAND}"
+      )
+  endfunction()
 
   # Luarocks is only built for the host
   if (CMAKE_CROSSCOMPILING)
@@ -361,32 +369,57 @@ if(USE_BUNDLED_LUAROCKS)
     set(LUAROCKS_C_COMPILER ${DEPS_C_COMPILER})
   endif()
 
-  ExternalProject_Add(luarocks
-    PREFIX ${DEPS_BUILD_DIR}
-    URL ${LUAROCKS_URL}
-    DOWNLOAD_DIR ${DEPS_DOWNLOAD_DIR}/luarocks
-    DOWNLOAD_COMMAND ${CMAKE_COMMAND}
-      -DPREFIX=${DEPS_BUILD_DIR}
-      -DDOWNLOAD_DIR=${DEPS_DOWNLOAD_DIR}/luarocks
-      -DURL=${LUAROCKS_URL}
-      -DEXPECTED_SHA1=${LUAROCKS_SHA1}
-      -DEXPECTED_MD5=${LUAROCKS_MD5}
-      -DTARGET=luarocks
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadAndExtractFile.cmake
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${DEPS_BUILD_DIR}/src/luarocks/configure
-      --prefix=${LUAROCKS_INSTALL_DIR} --force-config ${LUAROCKS_OPTS}
-      --lua-suffix=jit
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ${MAKE_PRG} bootstrap)
+  if (WIN32 AND MSVC)
+    # FIXME: Ignoring USE_BUNDLED_LUAJIT. We CANT build without it
+    set(LUAROCKS_CONFIGURE_COMMAND "")
+    set(LUAROCKS_BUILD_COMMAND "")
+    set(LUAROCKS_INSTALL_COMMAND install.bat /FORCECONFIG /NOREG /NOADMIN /Q /F
+	    /LUA ${LUAROCKS_INSTALL_DIR}
+	    /LIB ${LUAROCKS_LIB_DIR}
+	    /BIN ${LUAROCKS_BIN_DIR}
+	    /INC ${LUAROCKS_INSTALL_DIR}/include/luajit-2.0/
+	    /P ${LUAROCKS_INSTALL_DIR} /TREE ${LUAROCKS_INSTALL_DIR}
+	    /SCRIPTS ${LUAROCKS_BIN_DIR}
+	    /CMOD ${LUAROCKS_BIN_DIR}
+	    /LUAMOD ${LUAROCKS_BIN_DIR}/lua
+	    )
+    BuildLuaRocks()
+    set(LUAROCKS_BINARY ${LUAROCKS_INSTALL_DIR}\\2.2\\luarocks.bat)
+  else()
+    # Unix or Mingw cross compile
+    if(USE_BUNDLED_LUAJIT)
+      if (CMAKE_CROSSCOMPILING)
+        list(APPEND LUAROCKS_OPTS
+          --with-lua=${DEPS_HOST_DIR}
+          --with-lua-include=${DEPS_HOST_DIR}/include/luajit-2.0)
+      else()
+        list(APPEND LUAROCKS_OPTS
+          --with-lua=${DEPS_INSTALL_DIR}
+          --with-lua-include=${DEPS_INSTALL_DIR}/include/luajit-2.0)
+      endif()
+    endif()
+      set(LUAROCKS_CONFIGURE_COMMAND ${DEPS_BUILD_DIR}/src/luarocks/configure
+          --prefix=${LUAROCKS_INSTALL_DIR} --force-config ${LUAROCKS_OPTS}
+          --lua-suffix=jit)
+      set(LUAROCKS_BUILD_COMMAND "")
+      set(LUAROCKS_INSTALL_COMMAND ${MAKE_PRG} bootstrap)
+    BuildLuaRocks()
+    set(LUAROCKS_BINARY ${LUAROCKS_BIN_DIR}/luarocks)
+  endif()
+
   list(APPEND THIRD_PARTY_DEPS luarocks)
   if(USE_BUNDLED_LUAJIT)
     add_dependencies(luarocks luajit)
   endif()
 
+  if (NOT MSVC)
+    # Pass compiler/linker to Luarocks, except in MSVC (luarocks already knows)
+    set(LUAROCKS_BUILD_ARGS CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER})
+  endif()
+
   add_custom_command(OUTPUT ${LUAROCKS_BIN_DIR}/busted
-    COMMAND ${LUAROCKS_BIN_DIR}/luarocks
-    ARGS build busted 2.0.rc4 CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER}
+	  COMMAND ${LUAROCKS_BINARY}
+	  ARGS build busted 2.0.rc4 ${LUAROCKS_BUILD_ARGS}
     DEPENDS luarocks)
   add_custom_target(busted
     DEPENDS ${LUAROCKS_BIN_DIR}/busted)
@@ -395,8 +428,8 @@ if(USE_BUNDLED_LUAROCKS)
   # two instances running in parallel.  So we depend on busted to force it to
   # be serialized.
   add_custom_command(OUTPUT ${LUAROCKS_LIB_DIR}/luarocks/rocks/lua-messagepack
-    COMMAND ${LUAROCKS_BIN_DIR}/luarocks
-    ARGS build lua-messagepack CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER}
+    COMMAND ${LUAROCKS_BINARY}
+    ARGS build lua-messagepack ${LUAROCKS_BUILD_ARGS}
     DEPENDS busted)
   add_custom_target(lua-messagepack
     DEPENDS ${LUAROCKS_LIB_DIR}/luarocks/rocks/lua-messagepack)
@@ -404,20 +437,25 @@ if(USE_BUNDLED_LUAROCKS)
   # Like before, depend on lua-messagepack to ensure serialization of install
   # commands
   add_custom_command(OUTPUT ${LUAROCKS_LIB_DIR}/luarocks/rocks/lpeg
-    COMMAND ${LUAROCKS_BIN_DIR}/luarocks
-    ARGS build lpeg CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER}
+    COMMAND ${LUAROCKS_BINARY}
+    ARGS build lpeg ${LUAROCKS_BUILD_ARGS}
     DEPENDS lua-messagepack)
   add_custom_target(lpeg
     DEPENDS ${LUAROCKS_LIB_DIR}/luarocks/rocks/lpeg)
 
-  add_custom_command(OUTPUT ${LUAROCKS_LIB_DIR}/luarocks/rocks/nvim-client
-    COMMAND ${LUAROCKS_BIN_DIR}/luarocks
-    ARGS build https://raw.githubusercontent.com/neovim/lua-client/af161f5f89c7877d0f650b5de6b3a6126b38f012/nvim-client-0.0.1-10.rockspec CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER} LIBUV_DIR=${LUAROCKS_INSTALL_DIR}
-    DEPENDS lpeg libuv)
-  add_custom_target(nvim-client
-    DEPENDS ${LUAROCKS_LIB_DIR}/luarocks/rocks/nvim-client)
+  if (NOT MSVC)
+    # FIXME: Cant build nvim-client for Windows?
+    add_custom_command(OUTPUT ${LUAROCKS_LIB_DIR}/luarocks/rocks/nvim-client
+      COMMAND ${LUAROCKS_BINARY}
+      ARGS build https://raw.githubusercontent.com/neovim/lua-client/af161f5f89c7877d0f650b5de6b3a6126b38f012/nvim-client-0.0.1-10.rockspec CC=${LUAROCKS_C_COMPILER} LD=${LUAROCKS_C_COMPILER} LIBUV_DIR=${DEPS_INSTALL_DIR}
+      DEPENDS lpeg libuv)
+    add_custom_target(nvim-client
+      DEPENDS ${LUAROCKS_LIB_DIR}/luarocks/rocks/nvim-client)
+    list(APPEND THIRD_PARTY_DEPS busted lua-messagepack lpeg nvim-client)
+  else()
+    list(APPEND THIRD_PARTY_DEPS busted lua-messagepack lpeg)
+  endif()
 
-  list(APPEND THIRD_PARTY_DEPS busted lua-messagepack lpeg nvim-client)
 endif()
 
 add_custom_target(third-party ALL
