@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #include <uv.h>
 
@@ -55,12 +56,35 @@ bool server_init(void)
   servers = pmap_new(cstr_t)();
 
   if (!os_getenv(LISTEN_ADDRESS_ENV_VAR)) {
-    char *listen_address = (char *)vim_tempname();
-    os_setenv(LISTEN_ADDRESS_ENV_VAR, listen_address, 1);
-    free(listen_address);
+    os_setenv(LISTEN_ADDRESS_ENV_VAR, os_serveraddress(), 1);
   }
 
   return server_start((char *)os_getenv(LISTEN_ADDRESS_ENV_VAR)) == 0;
+}
+
+///
+/// Return default address for local server. The returned buffer
+/// is statically allocated.
+///
+/// In Windows this is a local pipe address in the format \\.\pipe\nvim-<PID>.
+/// For other systems it is a full path as returned by vim_tempname().
+///
+/// This function is NOT thread safe
+///
+const char* os_serveraddress(void)
+{
+  static char servername[ADDRESS_MAX_SIZE] = "";
+  if (servername[0] == '\0') {
+#ifdef WIN32
+    snprintf(servername, ADDRESS_MAX_SIZE,
+      "\\\\.\\pipe\\nvim-%" PRIu64, os_get_pid());
+#else
+    char *tmp = (char *)vim_tempname();
+    xstrlcpy(servername, tmp, ADDRESS_MAX_SIZE);
+    free(tmp);
+#endif
+  }
+  return servername;
 }
 
 /// Teardown the server module
