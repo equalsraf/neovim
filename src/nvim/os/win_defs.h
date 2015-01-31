@@ -1,14 +1,10 @@
 #ifndef NVIM_OS_WIN_DEFS_H
 #define NVIM_OS_WIN_DEFS_H
 
-#include "auto/config.h"
-
 // winsock2.h must be before windows.h - or so says Mingw
 #include <winsock2.h>
 #include <windows.h>
 #include <io.h>
-#include <uv.h>
-
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -45,7 +41,7 @@
 #  define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
 # endif
 # ifndef S_IXUSR
-//#  define S_IXUSR(mode) (((mode) & S_IFMT) == S_IEXEC)
+// #  define S_IXUSR(mode) (((mode) & S_IFMT) == S_IEXEC)
 #   define S_IXUSR S_IEXEC
 # endif
 
@@ -67,7 +63,7 @@
 #  endif
 # endif
 
-#endif // MSVC
+#endif  // MSVC
 
 #define TEMP_DIR_NAMES {"$TMP", "$TEMP", "$USERPROFILE", ""}
 #define TEMP_FILE_PATH_MAXLEN _MAX_PATH
