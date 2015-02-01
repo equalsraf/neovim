@@ -320,7 +320,7 @@ if(USE_BUNDLED_LUAJIT)
     BuildLuaJit(luajit)
   elseif(WIN32 AND MSVC)
     set(LUAJIT_CONFIGURE_COMMAND "")
-    set(LUAJIT_BUILD_COMMAND cd src && msvcbuild static)
+    set(LUAJIT_BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${DEPS_BUILD_DIR}/src/luajit/src ${DEPS_BUILD_DIR}/src/luajit/src/msvcbuild.bat static)
     set(LUAJIT_INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${DEPS_INSTALL_DIR}/bin
 	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/luajit/src/luajit.exe ${DEPS_INSTALL_DIR}/bin
 	    COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_BUILD_DIR}/src/luajit/src/lua51.lib ${DEPS_INSTALL_DIR}/bin
