@@ -328,6 +328,12 @@ int main(int argc, char **argv)
   /* Execute --cmd arguments. */
   exe_pre_commands(&params);
 
+#ifndef FEAT_TERMINAL_UI
+  if (os_isatty(fileno(stdin))) {
+    mch_msg("Terminal UI disabled at compile time, ignoring console input");
+  }
+#endif
+
   /* Source startup scripts. */
   source_startup_scripts(&params);
 
@@ -419,7 +425,9 @@ int main(int argc, char **argv)
   if (!params.headless) {
     // Stop reading from input stream, the UI layer will take over now.
     input_stop();
+#ifdef FEAT_TERMINAL_UI
     ui_builtin_start();
+#endif
   }
 
   setmouse();  // may start using the mouse

@@ -270,14 +270,16 @@ include_directories(SYSTEM ${MSGPACK_INCLUDE_DIRS})
 find_package(LuaJit REQUIRED)
 include_directories(SYSTEM ${LUAJIT_INCLUDE_DIRS})
 
-find_package(Unibilium REQUIRED)
-include_directories(SYSTEM ${UNIBILIUM_INCLUDE_DIRS})
-
-find_package(LibTermkey REQUIRED)
-include_directories(SYSTEM ${LIBTERMKEY_INCLUDE_DIRS})
-
-find_package(LibVterm REQUIRED)
-include_directories(SYSTEM ${LIBVTERM_INCLUDE_DIRS})
+if (NOT WIN32)
+  find_package(Unibilium REQUIRED)
+  include_directories(SYSTEM ${UNIBILIUM_INCLUDE_DIRS})
+  
+  find_package(LibTermkey REQUIRED)
+  include_directories(SYSTEM ${LIBTERMKEY_INCLUDE_DIRS})
+  
+  find_package(LibVterm REQUIRED)
+  include_directories(SYSTEM ${LIBVTERM_INCLUDE_DIRS})
+endif()
 
 option(CLANG_ASAN_UBSAN "Enable Clang address & undefined behavior sanitizer for nvim binary." OFF)
 option(CLANG_MSAN "Enable Clang memory sanitizer for nvim binary." OFF)
