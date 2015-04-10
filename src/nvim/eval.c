@@ -75,7 +75,9 @@
 #include "nvim/window.h"
 #include "nvim/os/os.h"
 #include "nvim/event/libuv_process.h"
-#include "nvim/event/pty_process.h"
+#ifdef FEAT_PTY_PROCESS
+# include "nvim/event/pty_process.h"
+#endif
 #include "nvim/event/rstream.h"
 #include "nvim/event/wstream.h"
 #include "nvim/os/time.h"
@@ -394,7 +396,9 @@ static dictitem_T vimvars_var;                  /* variable used for v: */
 typedef struct {
   union {
     LibuvProcess uv;
+#ifdef FEAT_PTY_PROCESS
     PtyProcess pty;
+#endif
   } proc;
   Stream in, out, err;
   Terminal *term;
@@ -11568,8 +11572,10 @@ static void f_jobresize(typval_T *argvars, typval_T *rettv)
     return;
   }
 
+#ifdef FEAT_PTY_PROCESS
   pty_process_resize(&data->proc.pty, argvars[1].vval.v_number,
       argvars[2].vval.v_number);
+#endif
   rettv->vval.v_number = 1;
 }
 
@@ -11673,11 +11679,16 @@ static void f_jobstart(typval_T *argvars, typval_T *rettv)
     }
   }
 
+#ifdef FEAT_PTY_PROCESS
   bool pty = job_opts && get_dict_number(job_opts, (uint8_t *)"pty") != 0;
+#else
+  bool pty = false;
+#endif
   TerminalJobData *data = common_job_init(argv, on_stdout, on_stderr, on_exit,
       job_opts, pty, !uses_shell);
   Process *proc = (Process *)&data->proc;
 
+#ifdef FEAT_PTY_PROCESS
   if (pty) {
     uint16_t width = get_dict_number(job_opts, (uint8_t *)"width");
     if (width > 0) {
@@ -11692,6 +11703,7 @@ static void f_jobstart(typval_T *argvars, typval_T *rettv)
       data->proc.pty.term_name = term;
     }
   }
+#endif
 
   if (!on_stdout) {
     proc->out = NULL;
@@ -21622,7 +21634,12 @@ static inline TerminalJobData *common_job_init(char **argv, ufunc_T *on_stdout,
   data->self = self;
   data->events = queue_new_child(loop.events);
   if (pty) {
+#ifdef FEAT_PTY_PROCESS
     data->proc.pty = pty_process_init(&loop, data);
+#else
+    // See f_jobstart and f_termopen - pty only works on UNIX
+    abort();
+#endif
   } else {
     data->proc.uv = libuv_process_init(&loop, data);
   }
@@ -21669,9 +21686,11 @@ static inline bool common_job_start(TerminalJobData *data, typval_T *rettv)
   if (!process_spawn(proc)) {
     EMSG2(_(e_jobspawn), cmd);
     xfree(cmd);
+#ifdef FEAT_PTY_PROCESS
     if (proc->type == kProcessTypePty) {
       xfree(data->proc.pty.term_name);
     }
+#endif
     rettv->vval.v_number = proc->status;
     term_job_data_decref(data);
     return false;

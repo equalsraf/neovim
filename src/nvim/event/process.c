@@ -3,13 +3,18 @@
 
 #include <uv.h>
 
+#ifdef HAVE_CONFIG_H
+# include "auto/config.h"
+#endif
 #include "nvim/os/shell.h"
 #include "nvim/event/loop.h"
 #include "nvim/event/rstream.h"
 #include "nvim/event/wstream.h"
 #include "nvim/event/process.h"
 #include "nvim/event/libuv_process.h"
-#include "nvim/event/pty_process.h"
+#ifdef FEAT_PTY_PROCESS
+# include "nvim/event/pty_process.h"
+#endif
 #include "nvim/globals.h"
 #include "nvim/log.h"
 
@@ -49,9 +54,11 @@ bool process_spawn(Process *proc) FUNC_ATTR_NONNULL_ALL
     case kProcessTypeUv:
       success = libuv_process_spawn((LibuvProcess *)proc);
       break;
+#ifdef FEAT_PTY_PROCESS
     case kProcessTypePty:
       success = pty_process_spawn((PtyProcess *)proc);
       break;
+#endif
     default:
       abort();
   }
@@ -121,7 +128,9 @@ void process_teardown(Loop *loop) FUNC_ATTR_NONNULL_ALL
 
   // Wait until all children exit
   LOOP_PROCESS_EVENTS_UNTIL(loop, loop->events, -1, kl_empty(loop->children));
+#ifdef FEAT_PTY_PROCESS
   pty_process_teardown(loop);
+#endif
 }
 
 // Wrappers around `stream_close` that protect against double-closing.
@@ -226,11 +235,13 @@ void process_stop(Process *proc) FUNC_ATTR_NONNULL_ALL
       // terminated after a timeout)
       process_close_in(proc);
       break;
+#ifdef FEAT_PTY_PROCESS
     case kProcessTypePty:
       // close all streams for pty processes to send SIGHUP to the process
       process_close_streams(proc);
       pty_process_close_master((PtyProcess *)proc);
       break;
+#endif
     default:
       abort();
   }
@@ -273,9 +284,11 @@ static void process_close_event(void **argv)
 {
   Process *proc = argv[0];
   shell_free_argv(proc->argv);
+#ifdef FEAT_PTY_PROCESS
   if (proc->type == kProcessTypePty) {
     xfree(((PtyProcess *)proc)->term_name);
   }
+#endif
   if (proc->cb) {
     proc->cb(proc, proc->status, proc->data);
   }
@@ -309,9 +322,11 @@ static void process_close(Process *proc)
     case kProcessTypeUv:
       libuv_process_close((LibuvProcess *)proc);
       break;
+#ifdef FEAT_PTY_PROCESS
     case kProcessTypePty:
       pty_process_close((PtyProcess *)proc);
       break;
+#endif
     default:
       abort();
   }
