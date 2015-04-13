@@ -46,6 +46,8 @@
 # endif
 #endif // _MSC_VER
 
+#define BACKSLASH_IN_FILENAME
+
 #define TEMP_DIR_NAMES {"$TMP", "$TEMP", "$USERPROFILE", ""}
 #define TEMP_FILE_PATH_MAXLEN _MAX_PATH
 
