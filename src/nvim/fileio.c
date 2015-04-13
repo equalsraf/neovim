@@ -4740,10 +4740,11 @@ buf_check_timestamp (
   char_u      *s;
   char        *reason;
 
+#ifdef FEAT_TERMINAL
   // If its a terminal, there is no file name, the buffer is not loaded,
   // 'buftype' is set, we are in the middle of a save or being called
   // recursively: ignore this buffer.
-  if (buf->terminal
+  if (BUF_ISTERMINAL(buf)
       || buf->b_ffname == NULL
       || buf->b_ml.ml_mfp == NULL
       || *buf->b_p_bt != NUL
@@ -4751,6 +4752,7 @@ buf_check_timestamp (
       || busy
       )
     return 0;
+#endif
 
   FileInfo file_info;
   bool file_info_ok;

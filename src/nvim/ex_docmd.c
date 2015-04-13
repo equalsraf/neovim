@@ -54,7 +54,9 @@
 #include "nvim/strings.h"
 #include "nvim/syntax.h"
 #include "nvim/tag.h"
-#include "nvim/terminal.h"
+#ifdef FEAT_TERMINAL
+# include "nvim/terminal.h"
+#endif
 #include "nvim/ui.h"
 #include "nvim/undo.h"
 #include "nvim/version.h"
@@ -1747,7 +1749,7 @@ static char_u * do_one_cmd(char_u **cmdlinep,
     }
     if (!MODIFIABLE(curbuf) && (ea.argt & MODIFY)
         // allow :put in terminals
-        && (!curbuf->terminal || ea.cmdidx != CMD_put)) {
+        && (!BUF_ISTERMINAL(curbuf) || ea.cmdidx != CMD_put)) {
       /* Command not allowed in non-'modifiable' buffer */
       errormsg = (char_u *)_(e_modifiable);
       goto doend;
@@ -6518,7 +6520,7 @@ do_exedit (
   } else if ((eap->cmdidx != CMD_split && eap->cmdidx != CMD_vsplit)
              || *eap->arg != NUL) {
     // ":edit <blank>" is a no-op in terminal buffers. #2822
-    if (curbuf->terminal != NULL && eap->cmdidx == CMD_edit && *eap->arg == NUL) {
+    if (BUF_ISTERMINAL(curbuf) && eap->cmdidx == CMD_edit && *eap->arg == NUL) {
       return;
     }
 
@@ -7576,7 +7578,7 @@ void update_topline_cursor(void)
  */
 static void ex_normal(exarg_T *eap)
 {
-  if (curbuf->terminal && State & TERM_FOCUS) {
+  if (BUF_ISTERMINAL(curbuf) && State & TERM_FOCUS) {
     EMSG("Can't re-enter normal mode from terminal mode");
     return;
   }
@@ -8772,7 +8774,7 @@ put_view (
      * Load the file.
      */
     if (wp->w_buffer->b_ffname != NULL
-        && (!bt_nofile(wp->w_buffer) || wp->w_buffer->terminal)
+        && (!bt_nofile(wp->w_buffer) || BUF_ISTERMINAL(wp->w_buffer))
         ) {
       /*
        * Editing a file in this buffer: use ":edit file".

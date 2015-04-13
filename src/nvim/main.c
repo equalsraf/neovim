@@ -146,7 +146,9 @@ void event_init(void)
   // finish mspgack-rpc initialization
   channel_init();
   server_init();
+#ifdef FEAT_TERMINAL
   terminal_init();
+#endif
 }
 
 void event_teardown(void)
@@ -161,7 +163,9 @@ void event_teardown(void)
   process_teardown(&loop);
   server_teardown();
   signal_teardown();
+#ifdef FEAT_TERMINAL
   terminal_teardown();
+#endif
 
   loop_close(&loop);
 }

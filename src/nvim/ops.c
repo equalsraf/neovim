@@ -37,7 +37,9 @@
 #include "nvim/screen.h"
 #include "nvim/search.h"
 #include "nvim/strings.h"
-#include "nvim/terminal.h"
+#ifdef FEAT_TERMINAL
+# include "nvim/terminal.h"
+#endif
 #include "nvim/ui.h"
 #include "nvim/undo.h"
 #include "nvim/window.h"
@@ -2589,7 +2591,7 @@ void do_put(int regname, yankreg_T *reg, int dir, long count, int flags)
       return;
   }
 
-  if (!curbuf->terminal) {
+  if (!BUF_ISTERMINAL(curbuf)) {
     // Autocommands may be executed when saving lines for undo, which may make
     // y_array invalid.  Start undo now to avoid that.
     if (u_save(curwin->w_cursor.lnum, curwin->w_cursor.lnum + 1) == FAIL) {
@@ -2645,7 +2647,8 @@ void do_put(int regname, yankreg_T *reg, int dir, long count, int flags)
     y_array = reg->y_array;
   }
 
-  if (curbuf->terminal) {
+#ifdef FEAT_TERMINAL
+  if (BUF_ISTERMINAL(curbuf)) {
     for (int i = 0; i < count; i++) {
       // feed the lines to the terminal
       for (int j = 0; j < y_size; j++) {
@@ -2658,6 +2661,7 @@ void do_put(int regname, yankreg_T *reg, int dir, long count, int flags)
     }
     return;
   }
+#endif
 
   if (y_type == MLINE) {
     if (flags & PUT_LINE_SPLIT) {

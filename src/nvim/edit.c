@@ -48,7 +48,9 @@
 #include "nvim/tag.h"
 #include "nvim/ui.h"
 #include "nvim/mouse.h"
-#include "nvim/terminal.h"
+#ifdef FEAT_TERMINAL
+# include "nvim/terminal.h"
+#endif
 #include "nvim/undo.h"
 #include "nvim/window.h"
 #include "nvim/event/loop.h"
@@ -1289,7 +1291,7 @@ edit (
     long count
 )
 {
-  if (curbuf->terminal) {
+  if (BUF_ISTERMINAL(curbuf)) {
     if (ex_normal_busy) {
       // don't enter terminal mode from `ex_normal`, which can result in all
       // kinds of havoc(such as terminal mode recursiveness). Instead, set a
@@ -1298,7 +1300,9 @@ edit (
       restart_edit = 'i';
       force_restart_edit = true;
     } else {
+#ifdef FEAT_TERMINAL
       terminal_enter();
+#endif
     }
     return false;
   }
