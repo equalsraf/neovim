@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>neovim</id>
+    <version>$version$</version>
+    <authors>Neovim contributors et. al.</authors>
+    <licenseUrl>https://raw.githubusercontent.com/neovim/neovim/master/LICENSE</licenseUrl>
+    <iconUrl>https://raw.githubusercontent.com/neovim/neovim.github.io/master/logos/neovim-mark.png</iconUrl>
+    <projectUrl>https://github.com/neovim/neovim</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ambitious Vim-fork focused on extensibility and agility</description>
+    <tags>neovim nvim vim editor</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\INSTALL\**\*"
+      target="content"/>
+  </files>
+</package>
