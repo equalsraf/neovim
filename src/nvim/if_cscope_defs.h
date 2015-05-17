@@ -16,6 +16,7 @@
 # include <sys/types.h>         /* pid_t */
 #endif
 
+#include "nvim/os/os_defs.h"
 #include "nvim/os/fs_defs.h"
 
 #define CSCOPE_SUCCESS          0
@@ -51,6 +52,14 @@ typedef struct csi {
   char *          flags;        /* additional cscope flags/options (e.g, -p2) */
 #if defined(UNIX)
   pid_t pid;                    /* PID of the connected cscope process. */
+#else
+# if defined(WIN32)
+    DWORD         pid;          /* PID of the connected cscope process. */
+    HANDLE        hProc;        /* cscope process handle */
+    DWORD         nVolume;      /* Volume serial number, instead of st_dev */
+    DWORD         nIndexHigh;   /* st_ino has no meaning in the Windows */
+    DWORD         nIndexLow;
+# endif
 #endif
   FileID file_id;
 

@@ -39,6 +39,10 @@
 #endif
 #include "nvim/if_cscope_defs.h"
 
+#if defined(WIN32) && !defined(S_ISLNK)
+# define S_ISLNK(mode) 0
+#endif
+
 #ifdef INCLUDE_GENERATED_DECLARATIONS
 # include "if_cscope.c.generated.h"
 #endif
@@ -745,6 +749,15 @@ err_closing:
 #else
   /* WIN32 */
   /* Create pipes to communicate with cscope */
+  int fd;
+  SECURITY_ATTRIBUTES sa;
+  PROCESS_INFORMATION pi;
+  BOOL pipe_stdin = FALSE, pipe_stdout = FALSE;
+  STARTUPINFO si;
+  HANDLE stdin_rd, stdout_rd;
+  HANDLE stdout_wr, stdin_wr;
+  BOOL created;
+
   sa.nLength = sizeof(SECURITY_ATTRIBUTES);
   sa.bInheritHandle = TRUE;
   sa.lpSecurityDescriptor = NULL;
@@ -862,11 +875,11 @@ err_closing:
     CloseHandle(pi.hThread);
 
     /* TODO - tidy up after failure to create files on pipe handles. */
-    if (((fd = _open_osfhandle((OPEN_OH_ARGTYPE)stdin_wr,
+    if (((fd = _open_osfhandle((intptr_t)stdin_wr,
               _O_TEXT|_O_APPEND)) < 0)
         || ((csinfo[i].to_fp = _fdopen(fd, "w")) == NULL))
       PERROR(_("cs_create_connection: fdopen for to_fp failed"));
-    if (((fd = _open_osfhandle((OPEN_OH_ARGTYPE)stdout_rd,
+    if (((fd = _open_osfhandle((intptr_t)stdout_rd,
               _O_TEXT|_O_RDONLY)) < 0)
         || ((csinfo[i].fr_fp = _fdopen(fd, "r")) == NULL))
       PERROR(_("cs_create_connection: fdopen for fr_fp failed"));
