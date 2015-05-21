@@ -74,16 +74,35 @@ elseif(MSVC OR MINGW)
   endif()
 
   # Ignore USE_BUNDLED_LUAJIT - always ON for native Win32
-  BuildLuarocks(INSTALL_COMMAND install.bat /FORCECONFIG /NOREG /NOADMIN /Q /F
-    /LUA ${DEPS_INSTALL_DIR}
-    /LIB ${DEPS_LIB_DIR}
-    /BIN ${DEPS_BIN_DIR}
-    /INC ${DEPS_INSTALL_DIR}/include/luajit-2.0/
-    /P ${DEPS_INSTALL_DIR} /TREE ${DEPS_INSTALL_DIR}
-    /SCRIPTS ${DEPS_BIN_DIR}
-    /CMOD ${DEPS_BIN_DIR}
-    ${MINGW_FLAG}
-    /LUAMOD ${DEPS_BIN_DIR}/lua)
+  if(MSYS)
+    # Cant build luarocks from MSYS, call cmd.exe through MSYS2 sh
+    # - MSYS2 automatically converts /... to paths, escape as //...
+    # - Try to escape the paths
+    string(REGEX REPLACE "/" "\\\\" I_DIR ${DEPS_INSTALL_DIR})
+    string(REGEX REPLACE "/" "\\\\" L_DIR ${DEPS_LIB_DIR})
+    string(REGEX REPLACE "/" "\\\\" B_DIR ${DEPS_BIN_DIR})
+    BuildLuarocks(INSTALL_COMMAND cmd.exe //c install.bat //FORCECONFIG //NOREG //NOADMIN //Q //F
+      //LUA "${I_DIR}"
+      //LIB "${L_DIR}"
+      //BIN "${B_DIR}"
+      //INC "${I_DIR}\\include\\luajit-2.0"
+      //P "${I_DIR}" //TREE "${I_DIR}"
+      //SCRIPTS "${B_DIR}"
+      //CMOD "${B_DIR}"
+      //MW
+      //LUAMOD "${B_DIR}\\lua")
+  else()
+    BuildLuarocks(INSTALL_COMMAND install.bat /FORCECONFIG /NOREG /NOADMIN /Q /F
+      /LUA ${DEPS_INSTALL_DIR}
+      /LIB ${DEPS_LIB_DIR}
+      /BIN ${DEPS_BIN_DIR}
+      /INC ${DEPS_INSTALL_DIR}/include/luajit-2.0/
+      /P ${DEPS_INSTALL_DIR} /TREE ${DEPS_INSTALL_DIR}
+      /SCRIPTS ${DEPS_BIN_DIR}
+      /CMOD ${DEPS_BIN_DIR}
+      ${MINGW_FLAG}
+      /LUAMOD ${DEPS_BIN_DIR}/lua)
+  endif()
 
   set(LUAROCKS_BINARY ${DEPS_INSTALL_DIR}/2.2/luarocks.bat)
 else()

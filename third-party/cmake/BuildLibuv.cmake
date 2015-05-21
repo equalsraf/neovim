@@ -41,7 +41,7 @@ set(UNIX_CFGCMD sh ${DEPS_BUILD_DIR}/src/libuv/autogen.sh &&
   --prefix=${DEPS_INSTALL_DIR} --libdir=${DEPS_INSTALL_DIR}/lib
   CC=${DEPS_C_COMPILER})
 
-if(UNIX)
+if(UNIX OR MSYS)
   BuildLibUv(
     CONFIGURE_COMMAND ${UNIX_CFGCMD}
     INSTALL_COMMAND ${MAKE_PRG} V=1 install)
