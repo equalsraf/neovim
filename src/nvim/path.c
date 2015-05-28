@@ -583,8 +583,12 @@ static size_t do_path_expand(garray_T *gap, const char_u *path,
       s = p + 1;
     } else if (path_end >= path + wildoff
                && (vim_strchr((char_u *)"*?[{~$", *path_end) != NULL
+#ifdef WIN32
+                 )) // In Windows we always ignore case
+#else
                    || (!p_fic && (flags & EW_ICASE)
                        && isalpha(PTR2CHAR(path_end)))))
+#endif
       e = p;
     if (has_mbyte) {
       len = (*mb_ptr2len)(path_end);
