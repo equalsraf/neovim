@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "nvim/os/os_defs.h"
+
 #define DEBUG_LOG_LEVEL 0
 #define INFO_LOG_LEVEL 1
 #define WARNING_LOG_LEVEL 2
