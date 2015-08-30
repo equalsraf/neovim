@@ -1,4 +1,6 @@
-#include <sys/fcntl.h>
+#ifndef _MSC_VER
+# include <sys/fcntl.h>
+#endif
 
 static const mode_t kO_RDONLY = O_RDONLY;
 static const mode_t kO_WRONLY = O_WRONLY;

@@ -134,12 +134,20 @@ add_custom_target(lpeg
 list(APPEND THIRD_PARTY_DEPS lpeg)
 
 if(USE_BUNDLED_BUSTED)
-  add_custom_command(OUTPUT ${HOSTDEPS_BIN_DIR}/busted
+  if(WIN32)
+    set(BUSTED_EXE "${HOSTDEPS_BIN_DIR}/busted.bat")
+  else()
+    set(BUSTED_EXE "${HOSTDEPS_BIN_DIR}/busted")
+  endif()
+  # We can remove the cliargs dependency once the busted version dependency
+  # is fixed.
+  add_custom_command(OUTPUT ${BUSTED_EXE}
     COMMAND ${LUAROCKS_BINARY}
     ARGS build https://raw.githubusercontent.com/Olivine-Labs/busted/v2.0.rc11-0/busted-2.0.rc11-0.rockspec ${LUAROCKS_BUILDARGS}
     DEPENDS luarocks)
   add_custom_target(busted
-    DEPENDS ${HOSTDEPS_BIN_DIR}/busted)
+    DEPENDS ${BUSTED_EXE})
+  list(APPEND THIRD_PARTY_DEPS busted)
 
     add_custom_command(OUTPUT ${HOSTDEPS_BIN_DIR}/luacheck
       COMMAND ${LUAROCKS_BINARY}
@@ -156,6 +164,6 @@ if(USE_BUNDLED_BUSTED)
     add_custom_target(nvim-client
       DEPENDS ${HOSTDEPS_LIB_DIR}/luarocks/rocks/nvim-client)
   
-    list(APPEND THIRD_PARTY_DEPS busted luacheck nvim-client)
+    list(APPEND THIRD_PARTY_DEPS luacheck nvim-client)
   endif()
 endif()
