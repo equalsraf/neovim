@@ -363,7 +363,7 @@ endif()
 message(STATUS "Using the Lua interpreter ${LUA_PRG}.")
 
 # Setup busted.
-find_program(BUSTED_PRG busted)
+find_program(BUSTED_PRG busted NAMES busted busted.bat)
 if(NOT BUSTED_OUTPUT_TYPE)
   set(BUSTED_OUTPUT_TYPE "utfTerminal")
 endif()
@@ -406,7 +406,12 @@ if(BUSTED_PRG)
   if(POLICY CMP0026)
     cmake_policy(SET CMP0026 OLD)
   endif()
-  get_target_property(TEST_LIBNVIM_PATH nvim-test LOCATION)
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    # In VS the LOCATION property holds VS special vars, nvim-test.dll
+    set(TEST_LIBNVIM_PATH ${CMAKE_BINARY_DIR}/lib/nvim-test.dll)
+  else()
+    get_target_property(TEST_LIBNVIM_PATH nvim-test LOCATION)
+  endif()
 
   configure_file(
     test/config/paths.lua.in
