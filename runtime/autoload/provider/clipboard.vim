@@ -47,6 +47,11 @@ elseif executable('xsel')
   let s:paste['+'] = 'xsel -o -b'
   let s:copy['*'] = 'xsel --nodetach -i -p'
   let s:paste['*'] = 'xsel -o -p'
+elseif executable('winclip')
+  let s:copy['+'] = 'winclip -c -m'
+  let s:paste['+'] = 'winclip -p -m'
+  let s:copy['*'] = s:copy['+']
+  let s:paste['*'] = s:paste['+']
 else
   echom 'clipboard: No clipboard tool available. See :help nvim-clipboard'
   finish
