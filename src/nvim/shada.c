@@ -761,11 +761,13 @@ static void close_sd_writer(ShaDaWriteDef *const sd_writer)
   FUNC_ATTR_NONNULL_ALL
 {
   const int fd = (int)(intptr_t) sd_writer->cookie;
+#ifdef HAVE_FSYNC
   if (fsync(fd) < 0) {
     emsg2(_(SERR "System error while synchronizing ShaDa file: %s"),
           strerror(errno));
     errno = 0;
   }
+#endif
   close_file(fd);
 }
 
