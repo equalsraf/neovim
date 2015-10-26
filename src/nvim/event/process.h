@@ -26,6 +26,9 @@ struct process {
   process_exit_cb cb;
   internal_process_cb internal_exit_cb, internal_close_cb;
   bool closed, term_sent;
+  // Windows only: enclose command arguments in double quotes. This should be
+  // false when using &shell since it has its own escaping
+  bool quote_cmd;
   Queue *events;
 };
 
@@ -47,6 +50,7 @@ static inline Process process_init(Loop *loop, ProcessType type, void *data)
     .cb = NULL,
     .closed = false,
     .term_sent = false,
+    .quote_cmd = true,
     .internal_close_cb = NULL,
     .internal_exit_cb = NULL
   };

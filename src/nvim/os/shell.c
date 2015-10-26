@@ -125,6 +125,7 @@ int os_call_shell(char_u *cmd, ShellOpts opts, char_u *extra_args)
   int status = do_os_system(shell_build_argv((char *)cmd, (char *)extra_args),
                             input.data,
                             input.len,
+                            false,
                             output_ptr,
                             &nread,
                             emsg_silent,
@@ -162,6 +163,8 @@ int os_call_shell(char_u *cmd, ShellOpts opts, char_u *extra_args)
 /// @param input The input to the shell (NULL for no input), passed to the
 ///              stdin of the resulting process.
 /// @param len The length of the input buffer (not used if `input` == NULL)
+/// @param quote_cmd If true the command arguments are enclosed in double
+///                   quotes (only in Windows).
 /// @param[out] output A pointer to to a location where the output will be
 ///                    allocated and stored. Will point to NULL if the shell
 ///                    command did not output anything. If NULL is passed,
@@ -173,15 +176,17 @@ int os_call_shell(char_u *cmd, ShellOpts opts, char_u *extra_args)
 int os_system(char **argv,
               const char *input,
               size_t len,
+              bool quote_cmd,
               char **output,
               size_t *nread) FUNC_ATTR_NONNULL_ARG(1)
 {
-  return do_os_system(argv, input, len, output, nread, true, false);
+  return do_os_system(argv, input, len, quote_cmd, output, nread, true, false);
 }
 
 static int do_os_system(char **argv,
                         const char *input,
                         size_t len,
+                        bool quote_cmd,
                         char **output,
                         size_t *nread,
                         bool silent,
@@ -213,6 +218,7 @@ static int do_os_system(char **argv,
   proc->in = input != NULL ? &in : NULL;
   proc->out = &out;
   proc->err = &err;
+  proc->quote_cmd = quote_cmd;
   if (!process_spawn(proc)) {
     loop_poll_events(&loop, 0);
     // Failed, probably due to `sh` not being executable
