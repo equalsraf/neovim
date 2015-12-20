@@ -33,6 +33,11 @@ endif(LIBUV_USE_STATIC)
 
 if(MSVC)
   list(APPEND LIBUV_NAMES libuv)
+
+  find_program(LIBUV_DLL libuv.dll)
+  if(NOT LIBUV_DLL)
+    message(FATAL_ERROR "Unable to find libuv.dll")
+  endif()
 else()
   list(APPEND LIBUV_NAMES uv)
 endif()

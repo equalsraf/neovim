@@ -269,6 +269,18 @@ add_executable(nvim ${NEOVIM_GENERATED_SOURCES} ${NEOVIM_SOURCES}
 target_link_libraries(nvim ${NVIM_EXEC_LINK_LIBRARIES})
 install_helper(TARGETS nvim)
 
+if(MSVC)
+  # Bundle dependency DLLs with nvim.exe
+  foreach(DLL ${MSGPACK_DLL} ${LIBUV_DLL})
+    get_filename_component(_name ${DLL} NAME_WE)
+    set(_name "dll_${_name}")
+    # Run after nvim, otherwise MSBuild complains it can't create bin/
+    add_custom_target(${_name} ALL DEPENDS ${DLL} nvim
+	    COMMAND ${CMAKE_COMMAND} -E copy ${DLL} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    install_helper(PROGRAMS ${DLL} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endforeach()
+endif()
+
 if(CLANG_ASAN_UBSAN)
   message(STATUS "Enabling Clang address sanitizer and undefined behavior sanitizer for nvim.")
   set_property(TARGET nvim APPEND_STRING PROPERTY COMPILE_FLAGS "-DEXITFREE ")

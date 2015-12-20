@@ -27,9 +27,20 @@ find_path(MSGPACK_INCLUDE_DIR msgpack.h
 if(MSGPACK_USE_STATIC)
   list(APPEND MSGPACK_NAMES
     "${CMAKE_STATIC_LIBRARY_PREFIX}msgpack${CMAKE_STATIC_LIBRARY_SUFFIX}")
+elseif(MSVC)
+  # Find the runtime DLL for msgpack
+  find_program(MSGPACK_DLL msgpack.dll)
+  if(NOT MSGPACK_DLL)
+    message(FATAL_ERROR "Unable to find msgpack.dll")
+  endif()
 endif()
 
-list(APPEND MSGPACK_NAMES msgpack)
+if(MSVC)
+  # The import library for the msgpack DLL has a different name
+  list(APPEND MSGPACK_NAMES msgpack_import)
+else()
+  list(APPEND MSGPACK_NAMES msgpack)
+endif()
 
 find_library(MSGPACK_LIBRARY NAMES ${MSGPACK_NAMES}
   HINTS ${PC_MSGPACK_LIBDIR} ${PC_MSGPACK_LIBRARY_DIRS}
