@@ -369,7 +369,11 @@ message(STATUS "Using the Lua interpreter ${LUA_PRG}.")
 # Setup busted.
 find_program(BUSTED_PRG busted NAMES busted busted.bat)
 if(NOT BUSTED_OUTPUT_TYPE)
-  set(BUSTED_OUTPUT_TYPE "utfTerminal")
+  if(WIN32)
+    set(BUSTED_OUTPUT_TYPE "plainTerminal")
+  else()
+    set(BUSTED_OUTPUT_TYPE "utfTerminal")
+  endif()
 endif()
 
 find_program(LUACHECK_PRG luacheck)
@@ -403,9 +407,7 @@ get_compile_flags(NVIM_VERSION_CFLAGS)
 
 add_subdirectory(test/includes)
 add_subdirectory(config)
-if (NOT WIN32)
-  add_subdirectory(test/functional/fixtures) # compile pty/shell test programs
-endif()
+add_subdirectory(test/functional/fixtures) # compile pty/shell test programs
 add_subdirectory(runtime)
 
 # Setup some test-related bits.  We do this after going down the tree because we
@@ -431,7 +433,11 @@ if(BUSTED_PRG)
     ${CMAKE_BINARY_DIR}/test/config/paths.lua)
 
   set(UNITTEST_PREREQS nvim-test unittest-headers)
-  set(FUNCTIONALTEST_PREREQS nvim tty-test shell-test)
+  if(WIN32)
+    set(FUNCTIONALTEST_PREREQS nvim shell-test)
+  else()
+    set(FUNCTIONALTEST_PREREQS nvim tty-test shell-test)
+  endif()
   set(BENCHMARK_PREREQS nvim tty-test)
 
   # Useful for automated build systems, if they want to manually run the tests.
