@@ -154,14 +154,12 @@ if(USE_BUNDLED_BUSTED)
     add_custom_target(luacheck
       DEPENDS ${HOSTDEPS_BIN_DIR}/luacheck)
   
-  if(NOT WIN32)
-    add_custom_command(OUTPUT ${HOSTDEPS_LIB_DIR}/luarocks/rocks/nvim-client
-      COMMAND ${LUAROCKS_BINARY}
-      ARGS build https://raw.githubusercontent.com/neovim/lua-client/0.0.1-14/nvim-client-0.0.1-14.rockspec ${LUAROCKS_BUILDARGS} LIBUV_DIR=${HOSTDEPS_INSTALL_DIR}
-      DEPENDS luacheck libuv)
-    add_custom_target(nvim-client
-      DEPENDS ${HOSTDEPS_LIB_DIR}/luarocks/rocks/nvim-client)
+  add_custom_command(OUTPUT ${HOSTDEPS_LIB_DIR}/luarocks/rocks/nvim-client
+    COMMAND ${LUAROCKS_BINARY}
+    ARGS build https://raw.githubusercontent.com/equalsraf/lua-client/tb-810/nvim-client-0.0.1-15.rockspec ${LUAROCKS_BUILDARGS} LIBUV_DIR=${HOSTDEPS_INSTALL_DIR}
+    DEPENDS luacheck libuv)
+  add_custom_target(nvim-client
+    DEPENDS ${HOSTDEPS_LIB_DIR}/luarocks/rocks/nvim-client)
   
-    list(APPEND THIRD_PARTY_DEPS luacheck nvim-client)
-  endif()
+  list(APPEND THIRD_PARTY_DEPS luacheck nvim-client)
 endif()
