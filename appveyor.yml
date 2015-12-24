@@ -20,7 +20,7 @@ build_script:
 - mkdir build
 - cd build
 - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DDEPS_PREFIX=..\%DEPS_PATH%\usr -DCMAKE_INSTALL_PREFIX=..\INSTALL ..
-- cmake --build .
+- cmake --build . -- /p:Configuration=Release
 - bin\nvim.exe --version
 - cmake --build . --target install -- /p:Configuration=Release
 - if DEFINED BUILD_NUPKG nuget pack -Version 0.0.0-pr810 ..\contrib\neovim.nuspec
