@@ -1,5 +1,8 @@
 version: '{build}'
 skip_tags: true
+configuration:
+  - Debug
+  - Release
 environment:
   GYP_MSVS_VERSION: 2015
   matrix:
@@ -14,15 +17,15 @@ build_script:
 - git config --global url."http://".insteadOf https://
 - mkdir %DEPS_PATH%
 - cd %DEPS_PATH%
-- cmake -G "%GENERATOR%" ..\third-party\
-- cmake --build .
+- cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% ..\third-party\
+- cmake --build . --config %CONFIGURATION%
 - cd ..
 - mkdir build
 - cd build
-- cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DDEPS_PREFIX=..\%DEPS_PATH%\usr -DCMAKE_INSTALL_PREFIX=..\INSTALL ..
-- cmake --build . -- /p:Configuration=Release
+- cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DDEPS_PREFIX=..\%DEPS_PATH%\usr -DCMAKE_INSTALL_PREFIX=..\INSTALL ..
+- cmake --build . --config %CONFIGURATION%
 - bin\nvim.exe --version
-- cmake --build . --target install -- /p:Configuration=Release
+- cmake --build . --target install --config %CONFIGURATION%
 - if DEFINED BUILD_NUPKG nuget pack -Version 0.0.0-pr810 ..\contrib\neovim.nuspec
 nuget:
   project_feed: true

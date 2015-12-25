@@ -40,8 +40,8 @@ set(MSGPACK_CONFIGURE_COMMAND ${CMAKE_COMMAND} ${DEPS_BUILD_DIR}/src/msgpack
   "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_COMPILER_ARG1} -fPIC"
   -DCMAKE_GENERATOR=${CMAKE_GENERATOR})
 
-set(MSGPACK_BUILD_COMMAND ${CMAKE_COMMAND} --build .)
-set(MSGPACK_INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install)
+set(MSGPACK_BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE})
+set(MSGPACK_INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE})
 
 if(MINGW AND CMAKE_CROSSCOMPILING)
   get_filename_component(TOOLCHAIN ${CMAKE_TOOLCHAIN_FILE} REALPATH)
@@ -63,8 +63,7 @@ elseif(MSVC)
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_COMPILER_ARG1}"
     # Make sure we use the same generator, otherwise we may
     # accidentaly end up using different MSVC runtimes
-    -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
-    -DCMAKE_BUILD_TYPE=Release)
+    -DCMAKE_GENERATOR=${CMAKE_GENERATOR})
   # Place the DLL in the bin folder
   set(MSGPACK_INSTALL_COMMAND ${MSGPACK_INSTALL_COMMAND}
     COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_INSTALL_DIR}/lib/msgpack.dll ${DEPS_INSTALL_DIR}/bin)
