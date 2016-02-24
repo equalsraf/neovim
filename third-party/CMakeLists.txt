@@ -123,6 +123,9 @@ set(GPERF_SHA256 767112a204407e62dbc3106647cf839ed544f3cf5d0f0523aaa2508623aad63
 set(WIN32YANK_URL https://github.com/equalsraf/win32yank/releases/download/v0.0.2/win32yank.zip)
 set(WIN32YANK_SHA256 78869bf68565607cda1b6a3d549e2487d59d6f0f16f9b003e123c0086f90309d)
 
+set(WINPTY_URL https://github.com/rprichard/winpty/releases/download/0.4.0/winpty-0.4.0-msvc2015.zip)
+set(WINPTY_SHA256 b81b16bb5967047d9ecf83ef8137121f130d8ea58090caa485c1c7d86bac099a)
+
 if(USE_BUNDLED_UNIBILIUM)
   include(BuildUnibilium)
 endif()
@@ -172,6 +175,8 @@ include(GetBinaryDeps)
 if(WIN32)
   GetBinaryDep(TARGET win32yank
     INSTALL_COMMAND ${CMAKE_COMMAND} -E copy win32yank.exe ${DEPS_INSTALL_DIR}/bin)
+
+  include(GetWinpty)
 endif()
 
 add_custom_target(clean-shared-libraries
