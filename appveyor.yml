@@ -1,10 +1,11 @@
 version: '{build}'
 configuration:
+- MSVC_64
 - MINGW_64
 - MINGW_32
 install: []
 build_script:
-- call .ci\build.bat
+- if "%CONFIGURATION%" == "MSVC_64" (call .ci\build_msvc.bat) else (call .ci\build.bat)
 artifacts:
 - path: build/Neovim.zip
 - path: build/Neovim.exe
