@@ -43,8 +43,27 @@ int os_get_user_name(char *s, size_t len)
 #ifdef UNIX
   return os_get_uname((uv_uid_t)getuid(), s, len);
 #else
-  // TODO(equalsraf): Windows GetUserName()
-  return os_get_uname((uv_uid_t)0, s, len);
+  int ret = FAIL;
+  WCHAR *utf16_username = xcalloc(len, sizeof(WCHAR));
+  DWORD utf16_len = len;
+  if (GetUserNameW(utf16_username, utf16_len) == 0) {
+    goto fail_utf16;
+  }
+
+  char *utf8_username;
+  if (utf16_to_utf8(utf16_username, &username) != 0) {
+    goto fail_utf8;
+  }
+
+  if (STRLCPY(s, utf8_username) < len) {
+    ret = OK;
+  }
+
+fail_utf8:
+  xfree(utf8_username);
+fail_utf16:
+  xfree(utf16_username)
+  return ret;
 #endif
 }
 
