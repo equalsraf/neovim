@@ -328,7 +328,11 @@ if((CLANG_ASAN_UBSAN OR CLANG_MSAN OR CLANG_TSAN) AND NOT CMAKE_C_COMPILER_ID MA
   message(FATAL_ERROR "Sanitizers are only supported for Clang.")
 endif()
 
-option(ENABLE_JEMALLOC "enable jemalloc" ON)
+if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  option(ENABLE_JEMALLOC "enable jemalloc" OFF)
+else()
+  option(ENABLE_JEMALLOC "enable jemalloc" ON)
+endif()
 
 if (ENABLE_JEMALLOC)
   if(CLANG_ASAN_UBSAN OR CLANG_MSAN OR CLANG_TSAN)
