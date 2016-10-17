@@ -62,6 +62,8 @@ if(MINGW AND CMAKE_CROSSCOMPILING)
 elseif(MSVC)
   set(LUV_CONFIGURE_COMMAND
     ${LUV_CONFIGURE_COMMAND_COMMON}
+    # luv has trouble finding the luajit libraries on Windows
+    -DLUAJIT_LIBRARIES=${DEPS_INSTALL_DIR}/lib
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     # Same as Unix without fPIC
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_COMPILER_ARG1} ${LUV_INCLUDE_FLAGS}"
