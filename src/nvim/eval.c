@@ -6706,6 +6706,11 @@ static int get_env_tv(char_u **arg, typval_T *rettv, int evaluate)
 }
 
 #ifdef INCLUDE_GENERATED_DECLARATIONS
+// MSVC uses intrinsic inline implementation for ceil and floor by default.
+// funcs.generated.h requires function forms for function pointers.
+# ifdef _MSC_VER
+#  pragma function(ceil, floor)
+# endif
 # include "funcs.generated.h"
 #endif
 
