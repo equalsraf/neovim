@@ -15,13 +15,13 @@ if exist C:\msys64\usr\bin\bash.exe (
 
 mkdir .deps
 cd .deps
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\third-party\ || goto :error
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\third-party\ %* || goto :error
 nmake VERBOSE=1 || goto :error
 cd ..
 
 mkdir build
 cd build
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUSTED_OUTPUT_TYPE=gtest %GPERF_PRG% .. || goto error
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUSTED_OUTPUT_TYPE=gtest %GPERF_PRG% .. %* || goto error
 nmake VERBOSE=1 || goto :error
 bin\nvim --version || goto :error
 
