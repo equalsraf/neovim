@@ -11,13 +11,13 @@ C:\msys64\usr\bin\bash -lc "pacman --verbose --noconfirm --needed -S gperf" || g
 
 mkdir .deps
 cd .deps
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..\third-party\ || goto :error
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\third-party\ || goto :error
 nmake VERBOSE=1 || goto :error
 cd ..
 
 mkdir build
 cd build
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUSTED_OUTPUT_TYPE=gtest -DGPERF_PRG="C:\msys64\usr\bin\gperf.exe" .. || goto error
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUSTED_OUTPUT_TYPE=gtest -DGPERF_PRG="C:\msys64\usr\bin\gperf.exe" .. || goto error
 nmake VERBOSE=1 || goto :error
 bin\nvim --version || goto :error
 
