@@ -86,4 +86,10 @@ typedef SSIZE_T ssize_t;
 # define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
 #endif
 
+// MSVC uses intrinsic inline implementation for ceil and floor by default.
+// gperf requires function forms for function pointers.
+#ifdef _MSC_VER
+# pragma function(ceil, floor)
+#endif
+
 #endif  // NVIM_OS_WIN_DEFS_H
