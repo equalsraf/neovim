@@ -145,7 +145,9 @@ static void terminfo_start(UI *ui)
     // will be populated with common values by fix_terminfo below
     data->ut = unibi_dummy();
   }
+#ifndef WIN32
   fix_terminfo(data);
+#endif
   // Initialize the cursor shape.
   unibi_out(ui, data->unibi_ext.set_cursor_shape_block);
   // Set 't_Co' from the result of unibilium & fix_terminfo.
