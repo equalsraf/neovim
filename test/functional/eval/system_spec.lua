@@ -136,6 +136,24 @@ describe('system()', function()
       end
     end)
 
+    it('in Windows, with the default shell settings', function()
+      if helpers.os_name() == 'windows' then
+        pending('Windows`', function() end)
+	  end
+      eq('c:\\\n', eval([[system('cd c:\ & echo %cd%')]]))
+      eq('"a b"\n', eval([[system('echo "a b"')]]))
+    end)
+
+    it('in windows, with powershell', function()
+      if helpers.os_name() == 'windows' then
+        pending('Windows`', function() end)
+	  end
+      helpers.set_shell_powershell()
+      eq('a\nb\n', eval([[system('echo a b')]]))
+      eq('c:\\\n', eval([[system('cd c:\; (Get-Location).Path)]]))
+      eq('a b\n', eval([[system('echo "a b"')]]))
+    end)
+
     it('`echo` and waits for its return', function()
       feed(':call system("echo")<cr>')
       screen:expect([[
