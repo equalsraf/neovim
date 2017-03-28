@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include <uv.h>
+#include <string.h>
 
 #include "nvim/event/loop.h"
 #include "nvim/event/rstream.h"
@@ -24,6 +25,15 @@ int libuv_process_spawn(LibuvProcess *uvproc)
   if (proc->detach) {
       uvproc->uvopts.flags |= UV_PROCESS_DETACHED;
   }
+#ifdef WIN32
+  // libuv assumes spawned processes follow the convention from
+  // CommandLineToArgvW(), cmd.exe does not. Disable quoting since it will
+  // result in unexpected behaviour, the caller is left with the responsibility
+  // to quote arguments accordingly. system('') has shell* options for this.
+  if (strcmp(proc->argv[0], "cmd.exe") == 0) {
+    uvproc->uvopts.flags |= UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS;
+  }
+#endif
   uvproc->uvopts.exit_cb = exit_cb;
   uvproc->uvopts.cwd = proc->cwd;
   uvproc->uvopts.env = NULL;
