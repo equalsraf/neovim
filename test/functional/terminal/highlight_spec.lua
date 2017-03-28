@@ -5,8 +5,6 @@ local feed, clear, nvim = helpers.feed, helpers.clear, helpers.nvim
 local nvim_dir, execute = helpers.nvim_dir, helpers.execute
 local eq, eval = helpers.eq, helpers.eval
 
-if helpers.pending_win32(pending) then return end
-
 describe('terminal window highlighting', function()
   local screen
 
@@ -54,6 +52,7 @@ describe('terminal window highlighting', function()
       end)
 
       local function pass_attrs()
+        if helpers.pending_win32(pending) then return end
         screen:expect(sub([[
           tty ready                                         |
           {NUM:text}text{10: }                                         |
@@ -68,6 +67,7 @@ describe('terminal window highlighting', function()
       it('will pass the corresponding attributes', pass_attrs)
 
       it('will pass the corresponding attributes on scrollback', function()
+        if helpers.pending_win32(pending) then return end
         pass_attrs()
         local lines = {}
         for i = 1, 8 do
@@ -143,6 +143,7 @@ describe('terminal window highlighting with custom palette', function()
   end)
 
   it('will use the custom color', function()
+    if helpers.pending_win32(pending) then return end
     thelpers.set_fg(3)
     thelpers.feed_data('text')
     thelpers.clear_attrs()
