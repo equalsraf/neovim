@@ -2090,11 +2090,7 @@ return {
       secure=true,
       vi_def=true,
       varname='p_sxe',
-      defaults={
-        condition='WIN32',
-        if_true={vi='"&|<>()@^'},
-        if_false={vi=""}
-      }
+      defaults={if_true={vi=""}}
     },
     {
       full_name='shiftround', abbreviation='sr',
