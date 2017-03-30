@@ -92,6 +92,13 @@ describe('system()', function()
     end)
   end)
 
+  if helpers.os_name() == 'windows' then
+    it('quoting does not work on windows', function()
+        eval([[system('cd "C:\Program Files"')]])
+        eq(0, eval('v:shell_error'))
+    end)
+  end
+
   if helpers.pending_win32(pending) then return end
 
   it('sets v:shell_error', function()
