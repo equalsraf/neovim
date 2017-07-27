@@ -43,6 +43,13 @@ if(WIN32)
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_COMPILER_ARG1} -fPIC"
       -DCMAKE_GENERATOR=${CMAKE_GENERATOR})
+
+  if(CMAKE_GENERATOR MATCHES "MinGW Makefiles")
+    # For MinGW makefiles, cmake refuses to generate a project if sh.exe is in the PATH. It seems
+    # this is no longer an issue with make - but until cmake removes the check, work around it
+    set(LIBVTERM_CONFIGURE_COMMAND ${LIBVTERM_CONFIGURE_COMMAND} -DCMAKE_SH="CMAKE_SH-NOTFOUND")
+  endif()
+
   set(LIBVTERM_BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE})
   set(LIBVTERM_INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE})
 else()

@@ -50,6 +50,12 @@ set(LUV_CONFIGURE_COMMAND_COMMON
   -DBUILD_SHARED_LIBS=OFF
   -DBUILD_MODULE=OFF)
 
+if(CMAKE_GENERATOR MATCHES "MinGW Makefiles")
+  # For MinGW makefiles, cmake refuses to generate a project if sh.exe is in the PATH. It seems
+  # this is no longer an issue with make - but until cmake removes the check, work around it
+  set(LUV_CONFIGURE_COMMAND_COMMON ${LUV_CONFIGURE_COMMAND_COMMON} -DCMAKE_SH="CMAKE_SH-NOTFOUND")
+endif()
+
 if(MINGW AND CMAKE_CROSSCOMPILING)
   get_filename_component(TOOLCHAIN ${CMAKE_TOOLCHAIN_FILE} REALPATH)
   set(LUV_CONFIGURE_COMMAND
