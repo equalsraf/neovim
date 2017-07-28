@@ -4,9 +4,11 @@ configuration:
 - MINGW_32
 install: []
 build_script:
-- call ci\build.bat
+# MSYSTEM= defines the type of shell used when calling bash
+- set MSYSTEM=MINGW64
+- C:\msys64\usr\bin\bash -l %APPVEYOR_BUILD_FOLDER%\ci\build-msys.sh %APPVEYOR_BUILD_FOLDER%
 cache:
-- C:\msys64\var\cache\pacman\pkg -> ci\build.bat
+- C:\msys64\var\cache\pacman\pkg -> ci\build-msys.sh
 - .deps -> third-party\**
 artifacts:
 - path: build/Neovim.zip
