@@ -71,16 +71,11 @@ elseif(MSVC OR MINGW)
   endif()
 
   # Ignore USE_BUNDLED_LUAJIT - always ON for native Win32
-  BuildLuarocks(INSTALL_COMMAND install.bat /FORCECONFIG /NOREG /NOADMIN /Q /F
-    /LUA ${DEPS_INSTALL_DIR}
-    /LIB ${DEPS_LIB_DIR}
-    /BIN ${DEPS_BIN_DIR}
-    /INC ${DEPS_INSTALL_DIR}/include/luajit-2.0/
-    /P ${DEPS_INSTALL_DIR}/${LUAROCKS_VERSION} /TREE ${DEPS_INSTALL_DIR}
-    /SCRIPTS ${DEPS_BIN_DIR}
-    /CMOD ${DEPS_BIN_DIR}
-    ${MINGW_FLAG}
-    /LUAMOD ${DEPS_BIN_DIR}/lua)
+
+  # Place command in bat file, invoke through cmd.exe, this indirection allows building
+  # luarocks in other shels, like msys2
+  file(WRITE luarocks_install_cmd.bat "install.bat /FORCECONFIG /NOREG /NOADMIN /Q /F /LUA ${DEPS_INSTALL_DIR} /LIB ${DEPS_LIB_DIR} /BIN ${DEPS_BIN_DIR} /INC ${DEPS_INSTALL_DIR}/include/luajit-2.0/ /P ${DEPS_INSTALL_DIR}/${LUAROCKS_VERSION} /TREE ${DEPS_INSTALL_DIR} /SCRIPTS ${DEPS_BIN_DIR} /CMOD ${DEPS_BIN_DIR} ${MINGW_FLAG} /LUAMOD ${DEPS_BIN_DIR}/lua")
+  BuildLuarocks(INSTALL_COMMAND cmd /c luarocks_install_cmd.bat)
 
   set(LUAROCKS_BINARY ${DEPS_INSTALL_DIR}/${LUAROCKS_VERSION}/luarocks.bat)
 else()
