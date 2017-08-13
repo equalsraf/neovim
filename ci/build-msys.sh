@@ -8,7 +8,7 @@ ARCH=$(uname -m)
 pacman --verbose --noconfirm -Su
 pacman --verbose --noconfirm --needed -S mingw-w64-$ARCH-cmake mingw-w64-$ARCH-perl mingw-w64-$ARCH-diffutils\
 	mingw-w64-$ARCH-unibilium mingw-w64-$ARCH-python2-pip mingw-w64-$ARCH-python3-pip gperf\
-	mingw-w64-$ARCH-lua51-lpeg mingw-w64-$ARCH-lua51-bitop
+	mingw-w64-$ARCH-lua51-lpeg mingw-w64-$ARCH-lua51-bitop mingw-w64-$ARCH-lua51-mpack
 
 # Setup python
 #pip2 install neovim
